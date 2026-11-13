@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Kitchen{% endblock %}
+{% block head %}<meta http-equiv="refresh" content="8">{% endblock %}
+{% block body %}
+<h1 class="h4 mb-3">Kitchen queue</h1>
+{% for order_id, group in items|groupby('order_id') %}
+<div class="card mb-3">
+  <div class="card-header fw-semibold">Table {{ group[0].table_label }} <span class="text-muted fw-normal">· order #{{ order_id }}</span></div>
+  <ul class="list-group list-group-flush">
+  {% for i in group %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>{{ i.quantity }} × {{ i.name }} <span class="badge status-{{ i.status }}">{{ i.status }}</span>
+        {% if i.note %}<div class="small text-danger">{{ i.note }}</div>{% endif %}
+        <div class="small text-muted">{{ i.created_at.strftime('%H:%M') }}</div></div>
+      <form method="post" action="{{ url_for('advance', item_id=i.id) }}">
+        <button class="btn btn-tf btn-sm">{{ 'Start preparing' if i.status == 'new' else 'Mark ready' }}</button>
+      </form>
+    </li>
+  {% endfor %}
+  </ul>
+</div>
+{% else %}
+<p class="text-muted">Nothing waiting. New orders appear here automatically.</p>
+{% endfor %}
+{% endblock %}

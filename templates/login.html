@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Log in · RestoDesk{% endblock %}
+{% block body %}
+<div class="row justify-content-center"><div class="col-md-5 col-lg-4">
+  <h1 class="h3 mb-3">Log in to RestoDesk</h1>
+  <form method="post" class="card card-body">
+    <label class="form-label" for="u">Username</label>
+    <input class="form-control mb-3" id="u" name="username" autofocus required>
+    <label class="form-label" for="p">Password</label>
+    <input class="form-control mb-3" id="p" name="password" type="password" required>
+    <button class="btn btn-tf">Log in</button>
+  </form>
+  <p class="mt-3 text-muted">New staff member? <a href="{{ url_for('signup') }}">Create an account</a></p>
+</div></div>
+{% endblock %}

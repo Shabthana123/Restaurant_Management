@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block head %}<meta http-equiv="refresh" content="15">{% endblock %}
+{% block body %}
+<h1 class="h4 mb-3">Tables</h1>
+<div class="row g-3">
+{% for t in tables %}
+  <div class="col-6 col-md-3">
+    <a href="{{ url_for('bill', order_id=t.order_id) if (session.user.role == 'cashier' and t.order_id) else url_for('order_page', table_id=t.id) }}" class="text-decoration-none text-reset">
+      <div class="table-tile p-3 {{ 'has-ready' if t.ready_count else ('occupied' if t.order_id else '') }}">
+        <div class="d-flex justify-content-between"><strong class="fs-5">{{ t.label }}</strong><span class="text-muted small">{{ t.seats }} seats</span></div>
+        {% if t.order_id %}
+          <div class="mt-2">Rs. {{ '%.2f'|format(t.total) }}</div>
+          {% if t.ready_count %}<div class="small text-success fw-semibold">{{ t.ready_count|int }} ready to serve</div>
+          {% else %}<div class="small text-muted">Order in progress</div>{% endif %}
+        {% else %}<div class="mt-2 text-muted">Free</div>{% endif %}
+      </div>
+    </a>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

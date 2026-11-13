@@ -1,0 +1,13 @@
+:root { --tf-ink:#1d2a2f; --tf-accent:#0f5c5c; --tf-bg:#f3f5f6; }
+body { background:var(--tf-bg); color:var(--tf-ink); }
+.navbar { background:var(--tf-accent); }
+.btn-tf { background:var(--tf-accent); color:#fff; }
+.btn-tf:hover { background:#0b4545; color:#fff; }
+.table-tile { border:2px solid #d5dcdf; background:#fff; border-radius:.5rem; transition:border-color .15s; }
+.table-tile:hover { border-color:var(--tf-accent); }
+.table-tile.occupied { border-color:#c9822b; background:#fff8ee; }
+.table-tile.has-ready { border-color:#2b8a57; background:#effaf3; }
+.status-new { background:#6c757d; } .status-preparing { background:#c9822b; }
+.status-ready { background:#2b8a57; } .status-served { background:#0f5c5c; }
+.status-cancelled { background:#b4434a; }
+@media (prefers-reduced-motion:reduce){ * { transition:none !important; } }

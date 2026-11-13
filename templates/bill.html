@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Bill · Table {{ order.table_label }}{% endblock %}
+{% block body %}
+<div class="d-flex align-items-center mb-3">
+  <a href="{{ url_for('tables') }}" class="btn btn-sm btn-outline-secondary me-3">Back</a>
+  <h1 class="h4 mb-0">Bill for table {{ order.table_label }} <span class="text-muted fw-normal">· order #{{ order.id }}</span></h1>
+</div>
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card"><ul class="list-group list-group-flush">
+      {% for i in items %}
+      <li class="list-group-item d-flex justify-content-between">
+        <span>{{ i.quantity }} × {{ i.name }} <span class="badge status-{{ i.status }}">{{ i.status }}</span></span>
+        <span>Rs. {{ '%.2f'|format(i.quantity * i.unit_price) }}</span>
+      </li>
+      {% else %}
+      <li class="list-group-item text-muted">Nothing to bill. Every item on this order was cancelled.</li>
+      {% endfor %}
+    </ul></div>
+  </div>
+  <div class="col-lg-6">
+  {% if not items %}
+    <form method="post" action="{{ url_for('void_empty', order_id=order.id) }}"><button class="btn btn-tf">Close empty order and free the table</button></form>
+  {% elif pending %}
+    <div class="alert alert-warning">{{ pending|length }} item(s) are still in the kitchen. You can take payment once they are ready, or ask the waiter to cancel them.</div>
+  {% else %}
+    <form method="post" action="{{ url_for('pay', order_id=order.id) }}" class="card card-body"
+          data-sub="{{ subtotal }}" data-svc="{{ svc_pct }}" data-tax="{{ tax_pct }}" id="payform">
+      <label class="form-label" for="disc">Discount (Rs.)</label>
+      <input class="form-control mb-3" id="disc" name="discount" type="number" step="0.01" min="0" value="0">
+      <label class="form-label" for="method">Payment method</label>
+      <select class="form-select mb-3" id="method" name="method"><option value="cash">Cash</option><option value="card">Card</option></select>
+      <div id="cashbox"><label class="form-label" for="tend">Cash received (Rs.)</label>
+        <input class="form-control mb-3" id="tend" name="tendered" type="number" step="0.01" min="0"></div>
+      <dl class="row mb-3">
+        <dt class="col-7 fw-normal">Subtotal</dt><dd class="col-5 text-end" id="o-sub"></dd>
+        <dt class="col-7 fw-normal">Discount</dt><dd class="col-5 text-end" id="o-disc"></dd>
+        <dt class="col-7 fw-normal">Service charge ({{ svc_pct }}%)</dt><dd class="col-5 text-end" id="o-svc"></dd>
+        {% if tax_pct > 0 %}<dt class="col-7 fw-normal">Tax ({{ tax_pct }}%)</dt><dd class="col-5 text-end" id="o-tax"></dd>{% endif %}
+        <dt class="col-7 fs-5">Total</dt><dd class="col-5 text-end fs-5 fw-semibold" id="o-total"></dd>
+        <dt class="col-7 fw-normal" id="chg-label">Change</dt><dd class="col-5 text-end" id="o-chg"></dd>
+      </dl>
+      <button class="btn btn-tf">Record payment</button>
+    </form>
+    <script>
+      const f = document.getElementById('payform'), $ = id => document.getElementById(id);
+      const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100, fmt = n => 'Rs. ' + r2(n).toFixed(2);
+      function calc() {
+        const sub = +f.dataset.sub, d = Math.min(Math.max(+$('disc').value || 0, 0), sub), base = sub - d;
+        const svc = r2(base * +f.dataset.svc / 100), tax = r2(base * +f.dataset.tax / 100), total = base + svc + tax;
+        $('o-sub').textContent = fmt(sub); $('o-disc').textContent = '− ' + fmt(d); $('o-svc').textContent = fmt(svc);
+        if ($('o-tax')) $('o-tax').textContent = fmt(tax);
+        $('o-total').textContent = fmt(total);
+        const cash = $('method').value === 'cash';
+        $('cashbox').hidden = !cash; $('chg-label').hidden = $('o-chg').hidden = !cash;
+        $('o-chg').textContent = fmt(Math.max((+$('tend').value || 0) - total, 0));
+        $('tend').required = cash;
+      }
+      f.addEventListener('input', calc); calc();
+    </script>
+  {% endif %}
+  </div>
+</div>
+{% endblock %}

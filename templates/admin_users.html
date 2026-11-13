@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Staff · RestoDesk{% endblock %}
+{% block body %}
+<h1 class="h4 mb-3">Staff accounts</h1>
+<table class="table table-sm align-middle bg-white">
+  <thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.full_name }}</td><td>{{ u.username }}</td><td>{{ u.role|capitalize }}</td>
+      <td>{% if u.is_active %}<span class="badge status-ready">Active</span>{% else %}<span class="badge status-preparing">Pending or disabled</span>{% endif %}</td>
+      <td class="text-end">
+        {% if u.id != session.user.id %}
+        <form method="post" action="{{ url_for('toggle_user', user_id=u.id) }}">
+          <button class="btn btn-sm {{ 'btn-outline-secondary' if u.is_active else 'btn-tf' }}">{{ 'Disable' if u.is_active else 'Approve' }}</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

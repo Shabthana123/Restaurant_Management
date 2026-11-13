@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Menu · RestoDesk{% endblock %}
+{% block body %}
+<h1 class="h4 mb-3">Menu</h1>
+<form method="post" class="card card-body mb-4">
+  <div class="row g-2">
+    <div class="col-md-4"><input class="form-control" name="name" placeholder="Item name" required></div>
+    <div class="col-md-3"><select class="form-select" name="category_id" aria-label="Category">{% for c in cats %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select></div>
+    <div class="col-md-3"><input class="form-control" name="price" type="number" step="0.01" min="0" placeholder="Price" required></div>
+    <div class="col-md-2 d-grid"><button class="btn btn-tf">Add item</button></div>
+  </div>
+</form>
+<table class="table table-sm align-middle bg-white">
+  <thead><tr><th>Item</th><th>Category</th><th class="text-end">Price</th><th></th></tr></thead>
+  <tbody>
+  {% for m in items %}
+    <tr class="{{ '' if m.is_available else 'text-muted' }}">
+      <td>{{ m.name }}</td><td>{{ m.category }}</td><td class="text-end">Rs. {{ '%.2f'|format(m.price) }}</td>
+      <td class="text-end"><form method="post" action="{{ url_for('toggle_item', item_id=m.id) }}">
+        <button class="btn btn-sm btn-outline-secondary">{{ 'Mark unavailable' if m.is_available else 'Mark available' }}</button></form></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

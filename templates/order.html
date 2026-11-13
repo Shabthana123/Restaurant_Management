@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Table {{ table.label }}{% endblock %}
+{% block body %}
+{% set can_add = session.user.role in ['waiter','admin'] %}
+<div class="d-flex align-items-center mb-3">
+  <a href="{{ url_for('tables') }}" class="btn btn-sm btn-outline-secondary me-3">Back</a>
+  <h1 class="h4 mb-0">Table {{ table.label }}</h1>
+  {% if order and session.user.role in ['cashier','admin'] %}
+  <a href="{{ url_for('bill', order_id=order.id) }}" class="btn btn-tf ms-auto">Go to bill</a>{% endif %}
+</div>
+<div class="row g-4">
+  {% if can_add %}
+  <div class="col-lg-7">
+    {% for cat, group in menu|groupby('category') %}
+      <h2 class="h6 mt-3">{{ cat }}</h2>
+      <ul class="list-group">
+      {% for m in group %}
+        <li class="list-group-item">
+          <form method="post" action="{{ url_for('add_item', table_id=table.id) }}" class="row g-2 align-items-center">
+            <input type="hidden" name="menu_item_id" value="{{ m.id }}">
+            <div class="col-sm-4">{{ m.name }}<div class="small text-muted">Rs. {{ '%.2f'|format(m.price) }}</div></div>
+            <div class="col-5 col-sm-3">
+              <div class="input-group input-group-sm">
+                <button type="button" class="btn btn-outline-secondary" onclick="step(this,-1)" aria-label="Decrease quantity">−</button>
+                <input class="form-control text-center px-0" type="number" name="quantity" value="1" min="1" max="50" aria-label="Quantity">
+                <button type="button" class="btn btn-outline-secondary" onclick="step(this,1)" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+            <div class="col-7 col-sm-3"><input class="form-control form-control-sm" name="note" maxlength="200" placeholder="Note for kitchen"></div>
+            <div class="col-sm-2 text-end"><button class="btn btn-sm btn-tf">Add</button></div>
+          </form>
+        </li>
+      {% endfor %}
+      </ul>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div class="col-lg-{{ 5 if can_add else 7 }}">
+    <div class="card"><div class="card-header fw-semibold">Current order</div>
+    <ul class="list-group list-group-flush">
+      {% for i in items %}
+      <li class="list-group-item d-flex justify-content-between align-items-start {{ 'text-decoration-line-through text-muted' if i.status=='cancelled' }}">
+        <div>
+          {{ i.quantity }} × {{ i.name }}
+          <span class="badge status-{{ i.status }}">{{ i.status }}</span>
+          {% if i.note %}<div class="small text-muted">{{ i.note }}</div>{% endif %}
+        </div>
+        <div class="text-end">
+          Rs. {{ '%.2f'|format(i.quantity * i.unit_price) }}
+          {% if i.status == 'new' and session.user.role == 'waiter' %}
+            <form method="post" action="{{ url_for('cancel_item', item_id=i.id) }}"><button class="btn btn-link btn-sm text-danger p-0">Cancel item</button></form>
+          {% elif i.status == 'ready' and session.user.role == 'waiter' %}
+            <form method="post" action="{{ url_for('mark_served', item_id=i.id) }}"><button class="btn btn-sm btn-success py-0">Mark served</button></form>
+          {% endif %}
+        </div>
+      </li>
+      {% else %}
+      <li class="list-group-item text-muted">No items yet.{% if can_add %} Add something from the menu.{% endif %}</li>
+      {% endfor %}
+    </ul>
+    <div class="card-footer d-flex justify-content-between fw-semibold"><span>Total before service charge</span><span>Rs. {{ '%.2f'|format(total) }}</span></div>
+    </div>
+  </div>
+</div>
+<script>
+  function step(btn, d) {
+    const i = btn.parentNode.querySelector('input');
+    i.value = Math.min(50, Math.max(1, (+i.value || 1) + d));
+  }
+</script>
+{% endblock %}

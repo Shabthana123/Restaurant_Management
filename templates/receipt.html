@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Receipt #{{ order.id }}{% endblock %}
+{% block head %}<style>@media print { nav, .no-print { display:none !important; } body { background:#fff; } }</style>{% endblock %}
+{% block body %}
+<div class="no-print mb-3">
+  <a href="{{ url_for('tables') }}" class="btn btn-sm btn-outline-secondary me-2">Back to tables</a>
+  <button class="btn btn-sm btn-tf" onclick="window.print()">Print receipt</button>
+</div>
+<div class="card mx-auto" style="max-width:420px"><div class="card-body">
+  <h1 class="h5 text-center mb-0">RestoDesk Restaurant</h1>
+  <p class="text-center text-muted small">Receipt #{{ order.id }} · Table {{ order.table_label }}<br>{{ p.paid_at.strftime('%Y-%m-%d %H:%M') }} · Cashier: {{ p.cashier }}</p>
+  <table class="table table-sm"><tbody>
+    {% for i in items %}<tr><td>{{ i.quantity }} × {{ i.name }}</td><td class="text-end">{{ '%.2f'|format(i.quantity * i.unit_price) }}</td></tr>{% endfor %}
+  </tbody></table>
+  <dl class="row mb-0">
+    <dt class="col-7 fw-normal">Subtotal</dt><dd class="col-5 text-end">{{ '%.2f'|format(p.subtotal) }}</dd>
+    {% if p.discount > 0 %}<dt class="col-7 fw-normal">Discount</dt><dd class="col-5 text-end">−{{ '%.2f'|format(p.discount) }}</dd>{% endif %}
+    {% if p.service_charge > 0 %}<dt class="col-7 fw-normal">Service charge</dt><dd class="col-5 text-end">{{ '%.2f'|format(p.service_charge) }}</dd>{% endif %}
+    {% if p.tax > 0 %}<dt class="col-7 fw-normal">Tax</dt><dd class="col-5 text-end">{{ '%.2f'|format(p.tax) }}</dd>{% endif %}
+    <dt class="col-7 fs-5">Total (Rs.)</dt><dd class="col-5 text-end fs-5 fw-semibold">{{ '%.2f'|format(p.total) }}</dd>
+    <dt class="col-7 fw-normal">Paid by {{ p.method }}</dt><dd class="col-5 text-end">{{ '%.2f'|format(p.amount_tendered) }}</dd>
+    {% if p.method == 'cash' %}<dt class="col-7 fw-normal">Change</dt><dd class="col-5 text-end">{{ '%.2f'|format(p.change_given) }}</dd>{% endif %}
+  </dl>
+  <p class="text-center text-muted small mt-3 mb-0">Thank you for dining with us.</p>
+</div></div>
+{% endblock %}
