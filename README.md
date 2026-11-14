@@ -1,6 +1,6 @@
 # RestoDesk (phase 1)
 
-Restaurant management: waiter orders, kitchen queue, menu admin. Python + Flask, MySQL, Bootstrap 5.
+RestoDesk: a role-based restaurant management system (Flask, MySQL) built with Claude as an AI coding assistant. Solves order, kitchen queue, and billing consistency using database transactions and row locking.
 
 ## Setup
 ```bash
